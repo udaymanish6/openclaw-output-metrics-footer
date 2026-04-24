@@ -9,7 +9,7 @@ assets/extension-template/
 Expected deployed extension path:
 
 ```text
-~/.openclaw/extensions/discord-output-metrics-footer/
+~/.openclaw/extensions/openclaw-output-metrics-footer/
 ```
 
 ## Hooks
@@ -23,7 +23,7 @@ message_sending
 
 `llm_output` records recent provider/model/token usage.
 
-`message_sending` appends the footer only for Discord delivery.
+`message_sending` appends the footer only at channel delivery time. It is provider-agnostic and should work for text channels that pass through OpenClaw's delivery runtime.
 
 This keeps the footer out of model prompts and memory context.
 
@@ -37,7 +37,7 @@ Fields:
 
 - `↑54k`: input/context tokens for the turn.
 - `↓157`: assistant output tokens for the turn.
-- `21%ctx`: current context usage percentage.
+- `21%ctx`: current context usage percentage, including configured reserve.
 - `5h 89%`: live/cached Codex short-window quota remaining.
 - `kimi-k2.6:cloud`: model used for the turn.
 
@@ -48,6 +48,29 @@ _🟢 ↑54k ↓157 · 21%ctx · 5h 89% · openai-codex/gpt-5.5 · sub ↑31k �
 ```
 
 Subagent accounting is best effort. The current extension aggregates nearby LLM outputs from other sessions within the cache window. If OpenClaw exposes parent/root run IDs later, replace this heuristic with exact parent-run matching.
+
+## Channel support
+
+Supported in principle:
+
+- Discord
+- Telegram
+- Slack
+- WhatsApp
+- Signal
+- Matrix
+- Mattermost
+- Google Chat
+- Microsoft Teams
+- IRC
+- Other OpenClaw text providers that emit `message_sending`
+
+Limitations:
+
+- Media-only sends are ignored.
+- Providers with strict message length limits may skip the footer if the output is already near the limit.
+- Rich card/embed surfaces may fall back to plain text behavior depending on the provider.
+- Subagent accounting is best-effort until OpenClaw exposes exact parent-run metadata in the hook context.
 
 ## Codex quota
 
@@ -62,7 +85,7 @@ Privacy rules:
 - Never print the token.
 - Never print the email.
 - Never print the auth profile ID.
-- Never print the auth profile path in Discord.
+- Never print the auth profile path in channel output.
 
 If quota fetch fails, omit the quota field rather than blocking delivery.
 
@@ -82,8 +105,7 @@ If a model is unknown, show `n/a%ctx` instead of guessing.
 From the skill folder:
 
 ```bash
-clawhub publish . --slug discord-output-metrics-footer --name "Discord Output Metrics Footer" --version 0.1.0 --changelog "Initial skill with bundled OpenClaw extension template"
+clawhub publish . --slug openclaw-output-metrics-footer --name "OpenClaw Output Metrics Footer" --version 0.2.0 --changelog "Expand footer support from Discord-only to all OpenClaw text channels"
 ```
 
 Run `clawhub login` first if not authenticated.
-

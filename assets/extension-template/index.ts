@@ -22,6 +22,7 @@ type Quota = {
 
 type Config = {
   enabled?: boolean;
+  enabledChannels?: string[];
   disabledConversations?: string[];
   disabledChannels?: string[];
   cacheMs?: number;
@@ -189,14 +190,14 @@ async function fetchCodexQuota(cacheMs: number): Promise<Quota | null> {
 function appendFooter(content: string, footer: string): string {
   const line = `\n\n_${footer}_`;
   if (content.includes("↑") && content.includes("%ctx")) return content;
-  if (content.length + line.length > 1990) return content;
+  if (content.length + line.length > 1800) return content;
   return `${content}${line}`;
 }
 
 export default definePluginEntry({
-  id: "discord-output-metrics-footer",
-  name: "Discord Output Metrics Footer",
-  description: "Append compact context/token/quota metrics to Discord outputs.",
+  id: "openclaw-output-metrics-footer",
+  name: "OpenClaw Output Metrics Footer",
+  description: "Append compact context/token/quota metrics to OpenClaw channel outputs.",
   register(api) {
     const cfg = (api.pluginConfig ?? {}) as Config;
     if (cfg.enabled === false) return;
@@ -217,10 +218,11 @@ export default definePluginEntry({
       recentOutputs.push(usage);
       if (usage.sessionKey) recentBySession.set(usage.sessionKey, usage);
       while (recentOutputs.length > 80) recentOutputs.shift();
-    }, { name: "discord-output-metrics-footer-llm-output" });
+    }, { name: "openclaw-output-metrics-footer-llm-output" });
 
     api.on("message_sending", async (event: any, ctx: any) => {
-      if (ctx.channelId !== "discord") return;
+      const channel = String(ctx.channelId ?? event.metadata?.channel ?? "");
+      if ((cfg.enabledChannels ?? []).length > 0 && !(cfg.enabledChannels ?? []).includes(channel)) return;
       if ((cfg.disabledChannels ?? []).includes(ctx.channelId)) return;
       if ((cfg.disabledConversations ?? []).includes(ctx.conversationId)) return;
       if (!event.content || typeof event.content !== "string") return;
@@ -230,7 +232,8 @@ export default definePluginEntry({
       const label = modelLabel(usage?.provider, usage?.model);
       const win = contextWindow(usage?.model, usage?.provider);
       const total = usage?.total ?? ((usage?.input ?? 0) + (usage?.output ?? 0));
-      const ctxPct = win ? Math.round((total / win) * 100) : undefined;
+      const effectiveTotal = Math.max(0, total + reserve);
+      const ctxPct = win ? Math.round((effectiveTotal / win) * 100) : undefined;
       const status = worst(colorForUsage(ctxPct), colorForRemaining(quota?.percent));
       const parts = [
         `${status} ↑${fmt(usage?.input)} ↓${fmt(usage?.output)}`,
@@ -241,6 +244,6 @@ export default definePluginEntry({
       const sub = cfg.appendSubagents === false ? null : aggregateSubagents(usage, cacheMs);
       if (sub) parts.push(`sub ↑${fmt(sub.input)} ↓${fmt(sub.output)}`);
       return { content: appendFooter(event.content, parts.join(" · ")) };
-    }, { name: "discord-output-metrics-footer-message-sending" });
+    }, { name: "openclaw-output-metrics-footer-message-sending" });
   }
 });

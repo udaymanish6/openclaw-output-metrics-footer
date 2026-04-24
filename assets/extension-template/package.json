@@ -1,8 +1,8 @@
 {
-  "name": "discord-output-metrics-footer",
-  "version": "0.1.0",
+  "name": "openclaw-output-metrics-footer",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Append compact context/token/quota metrics to OpenClaw Discord outputs.",
+  "description": "Append compact context/token/quota metrics to OpenClaw text channel outputs.",
   "main": "index.ts",
   "openclaw": {
     "extensions": [
