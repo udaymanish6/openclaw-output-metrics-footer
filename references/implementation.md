@@ -105,7 +105,7 @@ If a model is unknown, show `n/a%ctx` instead of guessing.
 From the skill folder:
 
 ```bash
-clawhub publish . --slug openclaw-output-metrics-footer --name "OpenClaw Output Metrics Footer" --version 0.2.0 --changelog "Expand footer support from Discord-only to all OpenClaw text channels"
+clawhub publish . --slug openclaw-output-metrics-footer --name "OpenClaw Output Metrics Footer" --version 0.2.1 --changelog "Parse current Codex quota usage windows"
 ```
 
 Run `clawhub login` first if not authenticated.

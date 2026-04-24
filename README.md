@@ -70,6 +70,9 @@ Add the plugin to `~/.openclaw/openclaw.json`:
     "entries": {
       "openclaw-output-metrics-footer": {
         "enabled": true,
+        "hooks": {
+          "allowConversationAccess": true
+        },
         "config": {
           "enabledChannels": [],
           "cacheMs": 120000,
@@ -167,7 +170,7 @@ openclaw-output-metrics-footer/
 ## Publish to ClawHub
 
 ```bash
-clawhub publish . --slug openclaw-output-metrics-footer --name "OpenClaw Output Metrics Footer" --version 0.2.0 --changelog "Expand footer support from Discord-only to all OpenClaw text channels"
+clawhub publish . --slug openclaw-output-metrics-footer --name "OpenClaw Output Metrics Footer" --version 0.2.1 --changelog "Parse current Codex quota usage windows"
 ```
 
 ## License

@@ -140,6 +140,7 @@ function resetLabelFromNow(resetAt?: unknown): string | undefined {
 
 function parseQuota(data: any): Quota {
   const candidates = [
+    data?.rate_limit?.primary_window,
     data?.codex,
     data?.plus,
     data?.pro,
@@ -152,7 +153,11 @@ function parseQuota(data: any): Quota {
   for (const c of candidates) {
     if (!c || typeof c !== "object") continue;
     percent ??= n(c.remaining_percent) ?? n(c.remainingPercent) ?? n(c.percent_remaining) ?? n(c.percentRemaining);
+    const usedPercent = n(c.used_percent) ?? n(c.usedPercent);
+    if (percent == null && usedPercent != null) percent = Math.max(0, Math.min(100, 100 - usedPercent));
     weeklyPercent ??= n(c.weekly_remaining_percent) ?? n(c.weeklyRemainingPercent);
+    const secondaryUsedPercent = n(data?.rate_limit?.secondary_window?.used_percent) ?? n(data?.rate_limit?.secondary_window?.usedPercent);
+    if (weeklyPercent == null && secondaryUsedPercent != null) weeklyPercent = Math.max(0, Math.min(100, 100 - secondaryUsedPercent));
     resetLabel ??= resetLabelFromNow(c.reset_at ?? c.resetAt);
     if (percent == null && Number.isFinite(c.requests_used) && Number.isFinite(c.requests_limit)) {
       percent = Math.round(((c.requests_limit - c.requests_used) / c.requests_limit) * 100);

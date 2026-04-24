@@ -1,6 +1,6 @@
 {
   "name": "openclaw-output-metrics-footer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Append compact context/token/quota metrics to OpenClaw text channel outputs.",
   "main": "index.ts",

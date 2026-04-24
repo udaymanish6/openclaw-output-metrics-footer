@@ -49,6 +49,9 @@ Add this plugin config to `~/.openclaw/openclaw.json`:
     "entries": {
       "openclaw-output-metrics-footer": {
         "enabled": true,
+        "hooks": {
+          "allowConversationAccess": true
+        },
         "config": {
           "enabledChannels": [],
           "cacheMs": 120000,
